@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aahd | UGC Creator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#FAF7F5',
+            fg: '#1A1A1A',
+            muted: '#6B6560',
+            accent: '#C4785A',
+            accentDark: '#A65D42',
+            card: '#FFFFFF',
+            border: '#E8E2DD',
+            warm: '#F5EDE8'
+          },
+          fontFamily: {
+            display: ['Cormorant Garamond', 'serif'],
+            body: ['DM Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #FAF7F5;
+      --fg: #1A1A1A;
+      --muted: #6B6560;
+      --accent: #C4785A;
+      --accent-dark: #A65D42;
+      --card: #FFFFFF;
+      --border: #E8E2DD;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+      .animate-on-scroll,
+      .stagger-item {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      overflow-x: hidden;
+    }
+
+    .bg-pattern {
+      background-image: 
+        radial-gradient(ellipse at 20% 0%, rgba(196, 120, 90, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(196, 120, 90, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(196, 120, 90, 0.03) 0%, transparent 70%);
+    }
+
+    .noise-overlay::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.015;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      z-index: 9999;
+    }
+
+    .font-display {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .nav-link {
+      position: relative;
+      padding: 0.5rem 0;
+      color: var(--muted);
+      transition: color 0.3s ease;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background-color: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus {
+      color: var(--fg);
+    }
+
+    .nav-link:hover::after,
+    .nav-link:focus::after {
+      width: 100%;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .hero-headline {
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 0.2s;
+      opacity: 0;
+    }
+
+    .hero-subheadline {
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 0.5s;
+      opacity: 0;
+    }
+
+    .hero-cta {
+      animation: fadeInUp 1s ease forwards;
+      animation-delay: 0.8s;
+      opacity: 0;
+    }
+
+    .nav-animate {
+      animation: fadeIn 0.8s ease forwards;
+      animation-delay: 0.3s;
+      opacity: 0;
+    }
+
+    .hero-decoration {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(196, 120, 90, 0.15) 0%, transparent 70%);
+      filter: blur(40px);
+      animation: float 8s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, -30px); }
+    }
+
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stagger-item {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .stagger-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .service-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .service-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .service-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(26, 26, 26, 0.08);
+      border-color: transparent;
+    }
+
+    .service-number {
+      font-size: 4rem;
+      font-weight: 300;
+      color: rgba(196, 120, 90, 0.15);
+      line-height: 1;
+      transition: color 0.4s ease;
+    }
+
+    .service-card:hover .service-number {
+      color: rgba(196, 120, 90, 0.25);
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .gallery-item img {
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26, 26, 26, 0.7) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.5rem;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(196, 120, 90, 0.3);
+    }
+
+    .btn-primary:hover::before {
+      opacity: 1;
+    }
+
+    .btn-primary span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-primary:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(196, 120, 90, 0.3);
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--border);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(196, 120, 90, 0.05);
+    }
+
+    .btn-secondary:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(196, 120, 90, 0.2);
+    }
+
+    .contact-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .contact-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px rgba(26, 26, 26, 0.05);
+    }
+
+    .contact-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(196, 120, 90, 0.1) 0%, rgba(196, 120, 90, 0.05) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      transition: all 0.3s ease;
+    }
+
+    .contact-card:hover .contact-icon {
+      background: var(--accent);
+      color: white;
+    }
+
+    .section-divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+      margin: 0 auto;
+    }
+
+    .mobile-menu {
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .mobile-menu.open {
+      transform: translateX(0);
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    /* Signature Styles */
+    .signature-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+    }
+
+    .signature-link:hover {
+      color: var(--accent);
+    }
+
+    .signature-link:hover .signature-icon {
+      transform: rotate(10deg) scale(1.1);
+    }
+
+    .signature-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .signature-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+      margin: 0 1rem;
+    }
+  </style>
+</head>
+<body class="bg-pattern noise-overlay">
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-md border-b border-border/50 nav-animate">
+    <div class="max-w-6xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <a href="#" class="font-display text-2xl font-semibold text-fg">Aahd</a>
+        
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#services" class="nav-link text-sm font-medium">Services</a>
+          <a href="#portfolio" class="nav-link text-sm font-medium">Portfolio</a>
+          <a href="#contact" class="nav-link text-sm font-medium">Contact</a>
+          <a href="#contact" class="btn-primary text-sm"><span>Travaillons ensemble</span></a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="menuBtn" class="md:hidden p-2 text-fg" aria-label="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="mobile-menu fixed inset-0 z-40 bg-bg/95 backdrop-blur-lg md:hidden">
+    <div class="flex flex-col items-center justify-center h-full gap-8">
+      <a href="#services" class="font-display text-3xl text-fg hover:text-accent transition-colors mobile-link">Services</a>
+      <a href="#portfolio" class="font-display text-3xl text-fg hover:text-accent transition-colors mobile-link">Portfolio</a>
+      <a href="#contact" class="font-display text-3xl text-fg hover:text-accent transition-colors mobile-link">Contact</a>
+      <a href="#contact" class="btn-primary mt-4 mobile-link"><span>Travaillons ensemble</span></a>
+    </div>
+    <button id="closeMenu" class="absolute top-6 right-6 p-2 text-fg" aria-label="Fermer">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
+    <div class="hero-decoration -top-20 -right-20"></div>
+    <div class="hero-decoration bottom-0 -left-40" style="animation-delay: -4s;"></div>
+    
+    <div class="max-w-5xl mx-auto px-6 py-20 relative z-10">
+      <div class="text-center">
+        <p class="text-accent font-medium tracking-wide mb-6 hero-headline">UGC Creator</p>
+        
+        <h1 class="font-display text-4xl md:text-6xl lg:text-7xl font-semibold text-fg leading-tight mb-8 hero-headline">
+          Bonjour! Je suis Aahd, je transforme chaque idée ou produit en contenu vidéo captivant et engageant qui touche le public et augmente l'interaction et les ventes.
+        </h1>
+        
+        <p class="text-muted text-lg md:text-xl max-w-3xl mx-auto mb-10 hero-subheadline">
+          Vidéos UGC, Montage créatif, Voix Off professionnelle, Contenu personnalisé pour chaque marque
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center hero-cta">
+          <a href="#portfolio" class="btn-primary"><span>Découvrir mon travail</span></a>
+          <a href="#contact" class="btn-secondary">Me contacter</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+      <span class="text-xs text-muted tracking-widest uppercase">Scroll</span>
+      <div class="w-px h-12 bg-gradient-to-b from-accent to-transparent"></div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="py-24 md:py-32 relative">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16 animate-on-scroll">
+        <p class="text-accent font-medium tracking-wide mb-4">Ce que je propose</p>
+        <h2 class="font-display text-4xl md:text-5xl font-semibold text-fg mb-6">Mes Services</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Service 1 -->
+        <article class="service-card rounded-xl p-8 stagger-item">
+          <span class="service-number font-display">01</span>
+          <h3 class="font-display text-2xl font-semibold text-fg mt-4 mb-3">Création de vidéos UGC</h3>
+          <p class="text-muted leading-relaxed">Vidéos montrant le produit de manière réelle et impactante, adaptées aux marques marocaines et internationales.</p>
+        </article>
+
+        <!-- Service 2 -->
+        <article class="service-card rounded-xl p-8 stagger-item">
+          <span class="service-number font-display">02</span>
+          <h3 class="font-display text-2xl font-semibold text-fg mt-4 mb-3">Voix Off professionnelle</h3>
+          <p class="text-muted leading-relaxed">Enregistrement vocal clair et attractif, donnant une personnalité unique à votre produit.</p>
+        </article>
+
+        <!-- Service 3 -->
+        <article class="service-card rounded-xl p-8 stagger-item">
+          <span class="service-number font-display">03</span>
+          <h3 class="font-display text-2xl font-semibold text-fg mt-4 mb-3">Montage créatif et rapide</h3>
+          <p class="text-muted leading-relaxed">Montage fluide, effets attractifs, mettant en valeur le produit de la meilleure manière.</p>
+        </article>
+
+        <!-- Service 4 -->
+        <article class="service-card rounded-xl p-8 stagger-item">
+          <span class="service-number font-display">04</span>
+          <h3 class="font-display text-2xl font-semibold text-fg mt-4 mb-3">Contenu personnalisé</h3>
+          <p class="text-muted leading-relaxed">Chaque vidéo est conçue selon l'identité de la marque et le public cible.</p>
+        </article>
+
+        <!-- Service 5 -->
+        <article class="service-card rounded-xl p-8 md:col-span-2 lg:col-span-2 stagger-item">
+          <span class="service-number font-display">05</span>
+          <h3 class="font-display text-2xl font-semibold text-fg mt-4 mb-3">Suivi complet du projet</h3>
+          <p class="text-muted leading-relaxed">De l'idée, planification, tournage, montage jusqu'à la livraison finale, garantie de qualité et rapidité.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio Section -->
+  <section id="portfolio" class="py-24 md:py-32 bg-warm relative">
+    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+    
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16 animate-on-scroll">
+        <p class="text-accent font-medium tracking-wide mb-4">Mon travail</p>
+        <h2 class="font-display text-4xl md:text-5xl font-semibold text-fg mb-6">Portfolio</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Image 1 -->
+        <div class="gallery-item aspect-[4/5] stagger-item">
+          <img 
+            src="https://z-cdn-media.chatglm.cn/files/3bb27a1d-8534-40e7-85f9-0c53c322dc7c.jpg?auth_key=1872489923-d84ed3ae31e748fca299353bba5b8550-0-d0b047aec3e2b7bb56b9fe6662241676" 
+            alt="UGC Content - Produit cosmétique avec nail art rouge" 
+            class="w-full h-full object-cover"
+            loading="lazy"
+          >
+          <div class="gallery-overlay">
+            <span class="text-white font-medium">Contenu UGC Cosmétique</span>
+          </div>
+        </div>
+
+        <!-- Image 2 -->
+        <div class="gallery-item aspect-[4/5] stagger-item">
+          <img 
+            src="https://z-cdn-media.chatglm.cn/files/b76fef84-afbd-4359-908e-73b08eb2e656.jpg?auth_key=1872489923-6c58fba432f04df48758106a1dfde57f-0-610cf591c27a9dcd5a658db80de7e0e3" 
+            alt="UGC Content - Flacon avec pipette COLORE" 
+            class="w-full h-full object-cover"
+            loading="lazy"
+          >
+          <div class="gallery-overlay">
+            <span class="text-white font-medium">Présentation Produit</span>
+          </div>
+        </div>
+
+        <!-- Image 3 -->
+        <div class="gallery-item aspect-[4/5] stagger-item">
+          <img 
+            src="https://z-cdn-media.chatglm.cn/files/23c05177-4c59-4a51-ac9d-aa53a95b12e2.jpg?auth_key=1872489923-ad4944d630894deea5ef3e70b193b7fe-0-8aa8a14c98e523ef8fc6d8b6154ca12a" 
+            alt="UGC Content - Huile d'Argan ZAINA" 
+            class="w-full h-full object-cover"
+            loading="lazy"
+          >
+          <div class="gallery-overlay">
+            <span class="text-white font-medium">Huile d'Argan Bio</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-24 md:py-32 relative">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-16 animate-on-scroll">
+        <p class="text-accent font-medium tracking-wide mb-4">Travaillons ensemble</p>
+        <h2 class="font-display text-4xl md:text-5xl font-semibold text-fg mb-6">Contactez-moi</h2>
+        <div class="section-divider mb-8"></div>
+        <p class="text-muted text-lg max-w-2xl mx-auto">
+          Prêt à transformer vos produits en contenu captivant? Discutons de votre projet!
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-12">
+        <!-- WhatsApp -->
+        <a href="https://wa.me/212605493238" target="_blank" rel="noopener noreferrer" class="contact-card flex items-center gap-4 group stagger-item">
+          <div class="contact-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm text-muted mb-1">WhatsApp</p>
+            <p class="text-fg font-medium group-hover:text-accent transition-colors">+212 605 493 238</p>
+          </div>
+        </a>
+
+        <!-- Email -->
+        <a href="mailto:elhaddadaahd@gmail.com" class="contact-card flex items-center gap-4 group stagger-item">
+          <div class="contact-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm text-muted mb-1">Email</p>
+            <p class="text-fg font-medium group-hover:text-accent transition-colors">elhaddadaahd@gmail.com</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="text-center animate-on-scroll">
+        <a href="https://wa.me/212605493238" target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex items-center gap-3">
+          <span>Démarrer une conversation</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 border-t border-border">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="font-display text-xl font-semibold text-fg">Aahd</p>
+        <p class="text-muted text-sm">UGC Creator | Maroc</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Signature -->
+  <div class="py-6 bg-warm border-t border-border">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
+        <span class="text-muted text-sm">Designed with</span>
+        <svg class="w-4 h-4 text-accent signature-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <span class="text-muted text-sm">by</span>
+        <a href="https://www.fikrago.com/" target="_blank" rel="noopener noreferrer" class="signature-link">
+          <span class="font-medium text-fg">Fikrago</span>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize all elements before using them
+    const menuBtn = document.getElementById('menuBtn');
+    const closeMenuBtn = document.getElementById('closeMenu');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileLinks = document.querySelectorAll('.mobile-link');
+
+    // Mobile Menu Toggle
+    function openMenu() {
+      mobileMenu.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    menuBtn.addEventListener('click', openMenu);
+    closeMenuBtn.addEventListener('click', closeMenu);
+    
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Stagger animation for items
+    const staggerObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          const items = entry.target.parentElement.querySelectorAll('.stagger-item');
+          const itemIndex = Array.from(items).indexOf(entry.target);
+          
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, itemIndex * 100);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.stagger-item').forEach(el => {
+      staggerObserver.observe(el);
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Navbar background on scroll
+    const navbar = document.querySelector('nav');
+    let lastScrollY = window.scrollY;
+
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > 50) {
+        navbar.style.boxShadow = '0 4px 20px rgba(26, 26, 26, 0.05)';
+      } else {
+        navbar.style.boxShadow = 'none';
+      }
+      
+      lastScrollY = currentScrollY;
+    });
+
+    // Keyboard navigation for mobile menu
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+        closeMenu();
+      }
+    });
+  </script>
+</body>
+</html>
